@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Football Standings</title>
+    <title>Football Standings</title>
 </head>
 <body>
-    <h1>Football Standings</h1>
+    <h1>Standings de La Liga 2020</h1>
     <div id="standings-container">
         <p>Cargando datos...</p>
     </div>
 
     <script>
-        // Configuración de la API
         const url = 'https://api-football-v1.p.rapidapi.com/v3/standings?league=39&season=2020';
         const options = {
             method: 'GET',
@@ -22,34 +21,35 @@
             }
         };
 
-        // Función para realizar la solicitud
         async function fetchStandings() {
+            const container = document.getElementById('standings-container');
             try {
                 const response = await fetch(url, options);
+                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
                 const data = await response.json();
-                displayStandings(data);
+
+                // Verifica que la respuesta contenga datos
+                if (!data.response || data.response.length === 0) {
+                    container.innerHTML = '<p>No hay datos disponibles.</p>';
+                    return;
+                }
+
+                // Muestra los standings
+                const standings = data.response[0].league.standings[0];
+                container.innerHTML = '';
+                standings.forEach(team => {
+                    const teamDiv = document.createElement('div');
+                    teamDiv.innerHTML = `
+                        <p><strong>${team.rank}.</strong> ${team.team.name} - ${team.points} puntos</p>
+                    `;
+                    container.appendChild(teamDiv);
+                });
             } catch (error) {
-                console.error('Error al obtener los datos:', error);
-                document.getElementById('standings-container').innerHTML = '<p>Error al cargar los datos.</p>';
+                console.error('Error al obtener datos:', error);
+                container.innerHTML = '<p>Error al cargar los datos. Verifica la consola para más detalles.</p>';
             }
         }
 
-        // Función para mostrar los datos en el DOM
-        function displayStandings(data) {
-            const container = document.getElementById('standings-container');
-            container.innerHTML = ''; // Limpiar el contenido previo
-            const standings = data.response[0].league.standings[0]; // Obtiene los standings
-
-            standings.forEach(team => {
-                const teamDiv = document.createElement('div');
-                teamDiv.innerHTML = `
-                    <p><strong>${team.rank}.</strong> ${team.team.name} - ${team.points} puntos</p>
-                `;
-                container.appendChild(teamDiv);
-            });
-        }
-
-        // Llamar a la función al cargar la página
         fetchStandings();
     </script>
 </body>
