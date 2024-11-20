@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Football Standings</title>
+</head>
+<body>
+    <h1>Football Standings</h1>
+    <div id="standings-container">
+        <p>Cargando datos...</p>
+    </div>
+
+    <script>
+        // Configuración de la API
+        const url = 'https://api-football-v1.p.rapidapi.com/v3/standings?league=39&season=2020';
+        const options = {
+            method: 'GET',
+            headers: {
+                'x-rapidapi-key': '83749c7cb5msh86709b76fc8a3d2p1b41eejsn95cf9bb37394',
+                'x-rapidapi-host': 'api-football-v1.p.rapidapi.com'
+            }
+        };
+
+        // Función para realizar la solicitud
+        async function fetchStandings() {
+            try {
+                const response = await fetch(url, options);
+                const data = await response.json();
+                displayStandings(data);
+            } catch (error) {
+                console.error('Error al obtener los datos:', error);
+                document.getElementById('standings-container').innerHTML = '<p>Error al cargar los datos.</p>';
+            }
+        }
+
+        // Función para mostrar los datos en el DOM
+        function displayStandings(data) {
+            const container = document.getElementById('standings-container');
+            container.innerHTML = ''; // Limpiar el contenido previo
+            const standings = data.response[0].league.standings[0]; // Obtiene los standings
+
+            standings.forEach(team => {
+                const teamDiv = document.createElement('div');
+                teamDiv.innerHTML = `
+                    <p><strong>${team.rank}.</strong> ${team.team.name} - ${team.points} puntos</p>
+                `;
+                container.appendChild(teamDiv);
+            });
+        }
+
+        // Llamar a la función al cargar la página
+        fetchStandings();
+    </script>
+</body>
+</html>
